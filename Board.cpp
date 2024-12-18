@@ -194,7 +194,7 @@ int CBoard::CreateListOfLadders(ListOfLadders* lst, int size)
 {
 	int counter = 0;
 	Ladder* node;
-	int IndexOfLaddersArr[] = { 10,50,43,13,53,30,20,50,63 };
+	int IndexOfLaddersArr[] = { 10,50,43,13,53,30,20,50,63 }; //
 	int AmountOfFLadders[] = { 2,1,2,1,1,1,1 };
 	int SizeOfLadderForLevel[] = { 2,3,4,12,5,3,2 };
 	for (int i = 0; i < size; i++)
