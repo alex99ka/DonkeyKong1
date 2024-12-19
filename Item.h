@@ -32,7 +32,7 @@ public:
 		: CPoint(x, y), m_symbol(c), m_color(color) { }
 
 	char GetSymbol() { return m_symbol; }
-	void SeRestoreSymbol(char ch, CColorPoint::c_color color) { m_RestoreSymbol = ch; m_RestoreColor = color; }
+	void SetRestoreSymbol(char ch, CColorPoint::c_color color) { m_RestoreSymbol = ch; m_RestoreColor = color; }
 	CColorPoint::c_color GetColor() { return m_color; }
 	
 	void Draw() { _draw(m_symbol, m_color); }

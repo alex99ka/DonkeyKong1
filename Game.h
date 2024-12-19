@@ -38,9 +38,10 @@ private:
 	void EraseCharacter(CMovingItem& character);
 	CGame::LiveStatus MovePlayer(CMovingItem& character, CPoint& newPos);
 	void GameOverScreen();
-	void DrawHearts(int& curr_lives);
+	void DrawHearts(int& CurrentLives);
 	void DrawHearts();
 	void CreatePrincess(); 
+	void CharacterDeathAnimation(CMovingItem& character);
 	bool m_IsColored = true;
 	bool m_DonkeyIsDead = false;
 	CMovingItem m_mario;

@@ -135,6 +135,7 @@ void CGame::Init()
 	m_donkeykong = CItem(m_board.GetBorderWidth()/2,2, AVATAR_DONKEYKONG, m_IsColored ? CColorPoint::c_color::CYAN : CColorPoint::c_color::WHITE);
 	m_DonkeyIsDead = false;
 }
+// called upon after a death, returns mario to spawn point
 void CGame::ResetCharacter()
 {
 	EraseCharacter(m_mario);
@@ -147,13 +148,13 @@ void CGame::ResetCharacter()
 		m_princess.Draw();
 }
 
-
+// the main game loop
 CGame:: MenuDecision CGame::PlayLoop()
 {
-	bool Mario(true), Italian(true); // mario will never be israeli, he is not jewish. 
+	bool Mario(true), Italian(true); // mario will never be israeli, he won't do an Aliya. 
 	bool OnLadder(false);
 	char input, prevchioce = '\0';
-	int curr_lives = 0;
+	int CurrentLives = 0;
 
 	hideCursor();
 	m_mario.Draw();
@@ -164,7 +165,7 @@ CGame:: MenuDecision CGame::PlayLoop()
 		{ // add an if statment that checks the prev input from player
 			input = _getch();
 			{
-				if (prevchioce != input)
+				if (prevchioce != input) // incase the user hold the same button / spams it
 				{
 					switch (input)
 					{
@@ -205,14 +206,17 @@ CGame:: MenuDecision CGame::PlayLoop()
 		switch(PlayerCheckNextCell(m_mario))
 		{
 		case DEAD:
-			ResetCharacter();
+			CharacterDeathAnimation(m_mario);
 			if (m_mario.GetLives() == 0)
 			{
 				GameOverScreen();
 				return RETURN_TO_MENU;
 			}
+			ResetCharacter();
 			clrscr();
 			m_board.Draw(m_IsColored);
+			if (m_DonkeyIsDead)
+				CreatePrincess();
 			m_mario.Draw();
 			m_donkeykong.Draw();
 			DrawHearts();
@@ -224,15 +228,15 @@ CGame:: MenuDecision CGame::PlayLoop()
 			break;
 		} 
 
-		if (curr_lives != MARIO_LIVES)
-			DrawHearts(curr_lives);
+		if (CurrentLives != MARIO_LIVES) //update CurrentLives and the heart animation
+			DrawHearts(CurrentLives);
 
 		std::cout.flush(); 
 		Sleep(SLEEP_TIME);
 	}
 	return RETURN_TO_MENU; // the game will never reach this line. this line only to remove the error 
 }
-
+// triggerd by the esc button
 CGame::MenuDecision CGame::Paused()
 {
 	bool flag(true);
@@ -272,6 +276,7 @@ CGame::MenuDecision CGame::Paused()
 						PrintGoodbye();
 						return GAME_END;
 					}
+
 				}
 			}
 		}
@@ -305,7 +310,7 @@ void CGame::PrintPauseMenu()
 		std::cout << line << std::endl;
 	}
 }
-
+// erase the character and print the origninal symbol 
 void CGame::EraseCharacter(CMovingItem& character)
 {
 	char symbol;
@@ -314,10 +319,10 @@ void CGame::EraseCharacter(CMovingItem& character)
 	m_board.GetBoardCh(character, &symbol, &color);
 	if (m_IsColored == false)
 		color = CColorPoint::WHITE;
-	character.SeRestoreSymbol(symbol, color);
+	character.SetRestoreSymbol(symbol, color);
 	character.Erase();
 }
-
+// checks all the items in the game
 CGame::NeighboorType CGame::WhoSomeoneNextToMe(CPoint& point)
 {
 	if (m_donkeykong.Compare(point))
@@ -335,10 +340,9 @@ CGame::NeighboorType CGame::WhoSomeoneNextToMe(CPoint& point)
 	
 	return NONE;
 }
-
+// moves mario / kill him depends on the other items
 CGame::LiveStatus CGame::MovePlayer(CMovingItem& character, CPoint& newPos)
 {
-
 	CGame::NeighboorType neigboorType;
 
 	neigboorType = WhoSomeoneNextToMe(newPos);
@@ -369,7 +373,7 @@ CGame::LiveStatus CGame::MovePlayer(CMovingItem& character, CPoint& newPos)
 
 	return ALIVE;
 }
-
+// start everything that is realated to falling
 void CGame::FallCharacter(CMovingItem& character)
 {
 	character.SetDirection(CMovingItem::DOWN); //fall
@@ -389,6 +393,7 @@ CGame::LiveStatus CGame::PlayerCheckNextCell(CMovingItem& character)
 
 	enum CBoard::Board_Place nextPlace  = m_board.GetBoardPlace(newPos);
 	
+	int nFalls = character.GetFallCounter();
 	switch (nextPlace) {
 	case CBoard::Board_Place::BOARDER:
 	case CBoard::Board_Place::FLOOR:
@@ -401,8 +406,14 @@ CGame::LiveStatus CGame::PlayerCheckNextCell(CMovingItem& character)
 			}
 		}
 		if (direction == CMovingItem::DOWN)
+		{
 			character.ResetFalls();
-		character.SetDirection(CMovingItem::STOP);
+			if (nFalls >= character.GetMaxFall())
+			{
+				return DEAD;
+			}
+			character.SetDirection(CMovingItem::STOP);
+		}
 		break;
 	case CBoard::Board_Place::LADDER:
 		return MovePlayer(character, newPos);
@@ -410,7 +421,8 @@ CGame::LiveStatus CGame::PlayerCheckNextCell(CMovingItem& character)
 	case CBoard::Board_Place::FREE:
 	{
 		if (place == CBoard::Board_Place::LADDER) {
-			if (direction == CMovingItem::LEFT || direction == CMovingItem::RIGHT) {
+			if (direction == CMovingItem::LEFT || direction == CMovingItem::RIGHT) 
+			{
 				CPoint downPos(newPos.GetX(), newPos.GetY() + 1);
 				enum CBoard::Board_Place downPlace = m_board.GetBoardPlace(downPos);
 				if (downPlace == CBoard::Board_Place::FREE)
@@ -418,7 +430,8 @@ CGame::LiveStatus CGame::PlayerCheckNextCell(CMovingItem& character)
 				else
 					return MovePlayer(character, newPos);
 			}
-			else if (direction == CMovingItem::UP) {
+			else if (direction == CMovingItem::UP) 
+			{
 				MovePlayer(character, newPos);
 				character.SetDirection(CMovingItem::STOP);
 				break;
@@ -434,11 +447,12 @@ CGame::LiveStatus CGame::PlayerCheckNextCell(CMovingItem& character)
 			}
 			return MovePlayer(character, newPos);
 		}
-		else {
-			if (direction == CMovingItem::DOWN) {
-				int nFalls = character.GetFallCounter();
-				if (nFalls == character.GetMaxFall())
-					return DEAD;
+		else
+		{
+			if (direction == CMovingItem::DOWN)
+			{//int nFalls = character.GetFallCounter();
+				//if (nFalls == character.GetMaxFall())
+					//return DEAD;
 				if (nFalls > 0) {
 					character.Falling();
 					return MovePlayer(character, newPos);
@@ -485,19 +499,6 @@ CGame::LiveStatus CGame::PlayerCheckNextCell(CMovingItem& character)
 void CGame::PrintCongratulation()
 {
 	clrscr();
-	/*if (m_IsColored)
-	{
-		CColoredPrint::prl("Congratinatio!!!!", CColoredPrint::c_color::YELLOW, CColoredPrint::c_decoration::BLINK);
-		CColoredPrint::prl("You Won !!!", CColoredPrint::c_color::YELLOW, CColoredPrint::c_decoration::BLINK);
-	}
-	else
-	{
-		CColoredPrint::prl("Congratinatio!!!!");
-		CColoredPrint::prl(" PRESS ANY KEY TO RETURN");
-	}
-	Sleep(1500);
-	CColoredPrint::prl(" PRESS ANY KEY TO RETURN"); */
-	
 
 		CColoredPrint::prl("         _                                  _                       ");
 		CColoredPrint::prl("__      _(_)_ __  _ __   ___ _ __  __      _(_)_ __  _ __   ___ _ __ ");
@@ -509,13 +510,14 @@ void CGame::PrintCongratulation()
 		CColoredPrint::prl(" | (__| | | | | (__|   <  __/ | | | | (_| | | | | | | | |  __/ |     ");
 		CColoredPrint::prl("  \\___|_| |_|_|\\___|_|\\_\\___|_| |_|  \\__,_|_|_| |_|_| |_\\___|_|     ");
 		CColoredPrint::prl("                                                                      ");
-		CColoredPrint::prl("\n\n PRESS ANY KEY TO RETURN");
+		Sleep(1500);
+		CColoredPrint::prl("\n\n\n PRESS ANY KEY TO RETURN");
+
 		while (true)
 		{
 			if (_kbhit())
 				return;
 		}
-
 }
 
 void CGame::GameOverScreen()
@@ -531,7 +533,7 @@ void CGame::GameOverScreen()
 		"    /               \\",
 		"   |    RIP MARIO    |",
 		"   |                 |",
-		"   |    1981-2023    |",
+		"   |    1981-2024    |",
 		"   |                 |",
 		"    \\               /",
 		"     \\_____________/",
@@ -576,12 +578,12 @@ void CGame::GameOverScreen()
 	}
 }
 
-void CGame::DrawHearts(int& curr_lives)
+void CGame::DrawHearts(int& CurrentLives)
 {
 	int i;
 	GoToXY(3, 2);
-	curr_lives = m_mario.GetLives();
-	for (i = 0; i < curr_lives; i++)
+	CurrentLives = m_mario.GetLives();
+	for (i = 0; i < CurrentLives; i++)
 	{
 			CColoredPrint::pr("<3", m_IsColored? CColoredPrint::c_color::RED : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
 	}
@@ -595,7 +597,7 @@ void CGame::DrawHearts()
 	for (i = 0; i < lives; i++)
 		CColoredPrint::pr("<3", m_IsColored ? CColoredPrint::c_color::RED : CColorPoint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
 }
-
+// triggerd after donkey was deafeated
 void CGame::CreatePrincess()
 {
 	int princessY = 3, princessX = 66;
@@ -608,6 +610,46 @@ void CGame::CreatePrincess()
 			CColoredPrint::pr(FLOOR_SYMB, m_IsColored ? CColorPoint::c_color::YELLOW : CColorPoint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
 		}
 		m_princess.Draw();
+}
+// animation inspired by old games for when mario dies
+void CGame::CharacterDeathAnimation(CMovingItem& character)
+{
+	int i,up = 4;
+	int x = character.GetX();
+	int y = character.GetY();
+	int BoarderHight = m_board.GetBorderHight();
+	Sleep(200);
+	for (i = 0; i < up; i++)
+	{
+		EraseCharacter(character);
+		y--;
+		character.SetY(y);
+		GoToXY(x,y);
+		if (m_IsColored)
+		{
+			if(i%2 == 0)
+			character.ChangeColor(CColorPoint::RED);
+			else
+			character.ChangeColor(CColorPoint::GREEN);
+		}
+		character.Draw();
+		Sleep(100);
+	}
+	for (; y < BoarderHight; y++)
+	{
+		EraseCharacter(character);
+		character.SetY(y);
+		GoToXY(x, y);
+		if (m_IsColored)
+		{
+			if (y % 2 == 0)
+				character.ChangeColor(CColorPoint::RED);
+			else
+				character.ChangeColor(CColorPoint::GREEN);
+		}
+		character.Draw();
+		Sleep(150);
+	}
 }
 
 
