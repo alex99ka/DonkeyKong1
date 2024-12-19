@@ -69,33 +69,35 @@ CGame::MenuDecision CGame:: GetMenuDecision()
 void CGame::PrintInstructions(ScreenType type)
 {
 	clrscr();
-	CColoredPrint::prl("\nGame instructions and keys\n", CColoredPrint::c_color::YELLOW);
+	CColoredPrint::prl("\nGame instructions and keys\n", m_IsColored ? CColoredPrint::c_color::YELLOW : CColoredPrint::c_color::WHITE);
 	CColoredPrint::prl("When the game starts, Mario(the hero) is positioned at his start position without any movement.");
 	CColoredPrint::prl("Once you selects move direction(using the keys, as listed below)");
 	CColoredPrint::prl("Mario will continue to move in this direction even if the user does not press any key");
 	CColoredPrint::prl("as long as game board boundaries are not reached and the STAY key is not pressed.");
-	CColoredPrint::prl("KEYS :", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::BLINK);
-	CColoredPrint::pr("LEFT :			", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::BOLD);
-	CColoredPrint::prl("a or A", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::ITALIC);
-	CColoredPrint::pr("RIGHT :			", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::BOLD);
-	CColoredPrint::prl("d or D", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::ITALIC);
-	CColoredPrint::pr("UP / JUMP :		", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::BOLD);
-	CColoredPrint::prl("w or W", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::ITALIC);
-	CColoredPrint::pr("DOWN :			", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::BOLD);
-	CColoredPrint::prl("x or X", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::ITALIC);
-	CColoredPrint::pr("STAY :			", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::BOLD);
-	CColoredPrint::prl("s or S", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::ITALIC);
-	CColoredPrint::prl("\nPausing a game:", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::UNDERLINE);
+	CColoredPrint::prl("KEYS :", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, m_IsColored ? CColoredPrint::c_decoration::BLINK : CColoredPrint::c_decoration::NORMAL);
+	CColoredPrint::pr("LEFT :			", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
+	CColoredPrint::prl("a or A", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::ITALIC);
+	CColoredPrint::pr("RIGHT :			", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
+	CColoredPrint::prl("d or D", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::ITALIC);
+	CColoredPrint::pr("UP / JUMP :		", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
+	CColoredPrint::prl("w or W", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::ITALIC);
+	CColoredPrint::pr("DOWN :			", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
+	CColoredPrint::prl("x or X", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::ITALIC);
+	CColoredPrint::pr("STAY :			", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
+	CColoredPrint::prl("s or S", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::ITALIC);
+	CColoredPrint::prl("\nPausing a game:", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::UNDERLINE);
 	CColoredPrint::prl("Pressing the ESC key during a game pauses the game.");
 	CColoredPrint::prl("When the game is at pause state, pressing ESC again would continue the game");
-	CColoredPrint::prl("\nExit a game:", CColoredPrint::c_color::GREEN, CColoredPrint::c_decoration::UNDERLINE);
+	CColoredPrint::prl("\nExit a game:", m_IsColored ? CColoredPrint::c_color::GREEN : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::UNDERLINE);
 	CColoredPrint::prl("You can exit the game via the Pause menu");
+	CColoredPrint::prl("\nYou need to defeat Donkey Kong in order to save the Princess",m_IsColored? CColoredPrint::c_color::BLUE : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::UNDERLINE);
+
 
 	while (true)
 	{
 		if (_kbhit())
 		{
-			char poop = _getch(); // fix this to be fucking better some type of flush
+			char clean = _getch(); // trash input to clean the buffer 
 			if (type == PAUSE_MENU) // ASCII code for ESC key
 			{
 				clrscr();
@@ -128,18 +130,21 @@ void CGame::StartGame()
 void CGame::Init()
 {
 	m_board.Init();
-	m_mario = CMovingItem(15, m_board.GetBorderHight() - 22, AVATAR_MARIO, m_IsColored ? CColorPoint::c_color::GREEN : CColorPoint::c_color::WHITE); // reset mario to the bottom 
+	m_mario = CMovingItem(2, m_board.GetBorderHight() - 2, AVATAR_MARIO, m_IsColored ? CColorPoint::c_color::GREEN : CColorPoint::c_color::WHITE); // reset mario to the bottom 
 	m_mario.SetLives(MARIO_LIVES);
 	m_donkeykong = CItem(m_board.GetBorderWidth()/2,2, AVATAR_DONKEYKONG, m_IsColored ? CColorPoint::c_color::CYAN : CColorPoint::c_color::WHITE);
+	m_DonkeyIsDead = false;
 }
 void CGame::ResetCharacter()
 {
 	EraseCharacter(m_mario);
 	m_mario.SetX(2);
-	m_mario.SetY(m_board.GetBorderHight() - 1);
+	m_mario.SetY(m_board.GetBorderHight() - 2);
 	m_mario.ReduceLife();
 	m_mario.ResetFalls();
 	m_mario.SetDirection(CMovingItem::STOP);
+	if (m_DonkeyIsDead)
+		m_princess.Draw();
 }
 
 
@@ -147,7 +152,8 @@ CGame:: MenuDecision CGame::PlayLoop()
 {
 	bool Mario(true), Italian(true); // mario will never be israeli, he is not jewish. 
 	bool OnLadder(false);
-	char input;	
+	char input, prevchioce = '\0';
+	int curr_lives = 0;
 
 	hideCursor();
 	m_mario.Draw();
@@ -158,41 +164,43 @@ CGame:: MenuDecision CGame::PlayLoop()
 		{ // add an if statment that checks the prev input from player
 			input = _getch();
 			{
-				switch (input)
+				if (prevchioce != input)
 				{
-				case 'a':
-				case 'A':
-					m_mario.SetDirection(CMovingItem::LEFT);
-					break;
-				case 'd':
-				case 'D':
-					m_mario.SetDirection(CMovingItem::RIGHT);
-					break;
-				case 'w':
-				case 'W':
-					m_mario.SetDirection(CMovingItem::UP);
-					break; 
-				case 'x':
-				case 'X':
-					m_mario.SetDirection(CMovingItem::DOWN);
-					break;
-				case 's':
-				case 'S':
-					m_mario.SetDirection(CMovingItem::STOP);
-					break;
-				case ESC_KEY:
-				{
-					if (Paused() == GAME_END)
-						return RETURN_TO_MENU;
-					break;
-				}
-				default:
-					// ignore illegal input
-					break;
+					switch (input)
+					{
+					case 'a':
+					case 'A':
+						m_mario.SetDirection(CMovingItem::LEFT);
+						break;
+					case 'd':
+					case 'D':
+						m_mario.SetDirection(CMovingItem::RIGHT);
+						break;
+					case 'w':
+					case 'W':
+						m_mario.SetDirection(CMovingItem::UP);
+						break;
+					case 'x':
+					case 'X':
+						m_mario.SetDirection(CMovingItem::DOWN);
+						break;
+					case 's':
+					case 'S':
+						m_mario.SetDirection(CMovingItem::STOP);
+						break;
+					case ESC_KEY:
+					{
+						if (Paused() == GAME_END)
+							return RETURN_TO_MENU;
+						break;
+					}
+					default:
+						// ignore illegal input
+						break;
+					}
 				}
 			}
 		} 
-
 
 		switch(PlayerCheckNextCell(m_mario))
 		{
@@ -207,7 +215,7 @@ CGame:: MenuDecision CGame::PlayLoop()
 			m_board.Draw(m_IsColored);
 			m_mario.Draw();
 			m_donkeykong.Draw();
-			//RedrawDonkeyKong();
+			DrawHearts();
 			break;
 		case WON:
 			PrintCongratulation();
@@ -215,6 +223,10 @@ CGame:: MenuDecision CGame::PlayLoop()
 		case ALIVE:
 			break;
 		} 
+
+		if (curr_lives != MARIO_LIVES)
+			DrawHearts(curr_lives);
+
 		std::cout.flush(); 
 		Sleep(SLEEP_TIME);
 	}
@@ -225,6 +237,7 @@ CGame::MenuDecision CGame::Paused()
 {
 	bool flag(true);
 	char choice, prevchioce= '\0';
+	
 
 	clrscr();
 	PrintPauseMenu();
@@ -243,6 +256,9 @@ CGame::MenuDecision CGame::Paused()
 						clrscr();
 						m_board.Draw(m_IsColored);
 						m_donkeykong.Draw();
+						DrawHearts();
+						if(m_DonkeyIsDead)
+							m_princess.Draw();
 						return GAME_START; // just continue the game
 					}
 					case '1':
@@ -296,6 +312,8 @@ void CGame::EraseCharacter(CMovingItem& character)
 	CColorPoint::c_color color;
 
 	m_board.GetBoardCh(character, &symbol, &color);
+	if (m_IsColored == false)
+		color = CColorPoint::WHITE;
 	character.SeRestoreSymbol(symbol, color);
 	character.Erase();
 }
@@ -303,14 +321,19 @@ void CGame::EraseCharacter(CMovingItem& character)
 CGame::NeighboorType CGame::WhoSomeoneNextToMe(CPoint& point)
 {
 	if (m_donkeykong.Compare(point))
-		return CGame::NeighboorType::DONKEYKONG;
+		return DONKEYKONG;
+	if (m_DonkeyIsDead)
+	{
+		if (m_princess.Compare(point))
+			return PRINCESS;
+	}
 
 	for (CMovingItem& barrel : m_barrels) {
 		if (barrel.Compare(point))
-			return CGame::NeighboorType::BARREL;
+			return BARREL;
 	}
 	
-	return CGame::NeighboorType::NONE;
+	return NONE;
 }
 
 CGame::LiveStatus CGame::MovePlayer(CMovingItem& character, CPoint& newPos)
@@ -321,17 +344,25 @@ CGame::LiveStatus CGame::MovePlayer(CMovingItem& character, CPoint& newPos)
 	neigboorType = WhoSomeoneNextToMe(newPos);
 	switch (neigboorType)
 	{
-	case CGame::NeighboorType::NONE:
+	case NONE:
 		if (character.IsStop() == false) {
 			EraseCharacter(character);
 		}
 		break;
-	case CGame::NeighboorType::BARREL:
+	case BARREL:
 		return DEAD;
-	case CGame::NeighboorType::DONKEYKONG:
+	case DONKEYKONG:
+		m_donkeykong.ChangeColor(m_IsColored ? CColorPoint:: RED : CColorPoint::BLACK);
+		if (m_DonkeyIsDead == false)
+			CreatePrincess();
+		m_DonkeyIsDead = true;
+		EraseCharacter(character);
+		break;
+	case PRINCESS:
 		return WON;
 	}
 
+	m_donkeykong.Draw();
 	character.SetX(newPos.GetX());
 	character.SetY(newPos.GetY());
 	character.Draw();
@@ -454,7 +485,7 @@ CGame::LiveStatus CGame::PlayerCheckNextCell(CMovingItem& character)
 void CGame::PrintCongratulation()
 {
 	clrscr();
-	if (m_IsColored)
+	/*if (m_IsColored)
 	{
 		CColoredPrint::prl("Congratinatio!!!!", CColoredPrint::c_color::YELLOW, CColoredPrint::c_decoration::BLINK);
 		CColoredPrint::prl("You Won !!!", CColoredPrint::c_color::YELLOW, CColoredPrint::c_decoration::BLINK);
@@ -465,12 +496,26 @@ void CGame::PrintCongratulation()
 		CColoredPrint::prl(" PRESS ANY KEY TO RETURN");
 	}
 	Sleep(1500);
-	CColoredPrint::prl(" PRESS ANY KEY TO RETURN");
-	while (true)
-	{
-		if (_kbhit())
-			return;
-	}
+	CColoredPrint::prl(" PRESS ANY KEY TO RETURN"); */
+	
+
+		CColoredPrint::prl("         _                                  _                       ");
+		CColoredPrint::prl("__      _(_)_ __  _ __   ___ _ __  __      _(_)_ __  _ __   ___ _ __ ");
+		CColoredPrint::prl("\\ \\ /\\ / / | '_ \\| '_ \\ / _ \\ '__| \\ \\ /\\ / / | '_ \\| '_ \\ / _ \\ '__|");
+		CColoredPrint::prl(" \\ V  V /| | | | | | | |  __/ |     \\ V  V /| | | | | | | |  __/ |   ");
+		CColoredPrint::prl("  \\_/\\_/ |_|_| |_|_|_|_|\\___|_|      \\_/\\_/_|_|_| |_|_| |_|\\___|_|   ");
+		CColoredPrint::prl("   ___| |__ (_) ___| | _____ _ __     __| (_)_ __  _ __   ___ _ __   ");
+		CColoredPrint::prl("  / __| '_ \\| |/ __| |/ / _ \\ '_ \\   / _` | | '_ \\| '_ \\ / _ \\ '__|  ");
+		CColoredPrint::prl(" | (__| | | | | (__|   <  __/ | | | | (_| | | | | | | | |  __/ |     ");
+		CColoredPrint::prl("  \\___|_| |_|_|\\___|_|\\_\\___|_| |_|  \\__,_|_|_| |_|_| |_\\___|_|     ");
+		CColoredPrint::prl("                                                                      ");
+		CColoredPrint::prl("\n\n PRESS ANY KEY TO RETURN");
+		while (true)
+		{
+			if (_kbhit())
+				return;
+		}
+
 }
 
 void CGame::GameOverScreen()
@@ -530,4 +575,39 @@ void CGame::GameOverScreen()
 			return;
 	}
 }
+
+void CGame::DrawHearts(int& curr_lives)
+{
+	int i;
+	GoToXY(3, 2);
+	curr_lives = m_mario.GetLives();
+	for (i = 0; i < curr_lives; i++)
+	{
+			CColoredPrint::pr("<3", m_IsColored? CColoredPrint::c_color::RED : CColoredPrint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
+	}
+}
+
+void CGame::DrawHearts()
+{
+	int i, lives;
+	lives = m_mario.GetLives();
+	GoToXY(3, 2);
+	for (i = 0; i < lives; i++)
+		CColoredPrint::pr("<3", m_IsColored ? CColoredPrint::c_color::RED : CColorPoint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
+}
+
+void CGame::CreatePrincess()
+{
+	int princessY = 3, princessX = 66;
+	int PlatforSize = 3;
+		m_princess = CItem(princessX, princessY, AVATAR_PRINCESS, m_IsColored ? CColorPoint::c_color::MAGENTA : CColorPoint::c_color::WHITE);
+		for (int i = -1; i < PlatforSize - 1; i++)
+		{
+			m_board.UpdateWorkBoard(princessX + i, princessY + 1, FLOOR_SYMB);
+			GoToXY(princessX + i, princessY + 1);
+			CColoredPrint::pr(FLOOR_SYMB, m_IsColored ? CColorPoint::c_color::YELLOW : CColorPoint::c_color::WHITE, CColoredPrint::c_decoration::BOLD);
+		}
+		m_princess.Draw();
+}
+
 

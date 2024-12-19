@@ -20,6 +20,7 @@ private:
 	static constexpr char AVATAR_PRINCESS = '$';
 	static constexpr int NUM_OF_BARRELS = 7;
 	static constexpr int SLEEP_TIME = 100;
+	static constexpr char FLOOR_SYMB = '=';
 
 	void PrintMenu(bool IsColored);
 	MenuDecision GetMenuDecision();
@@ -37,9 +38,14 @@ private:
 	void EraseCharacter(CMovingItem& character);
 	CGame::LiveStatus MovePlayer(CMovingItem& character, CPoint& newPos);
 	void GameOverScreen();
+	void DrawHearts(int& curr_lives);
+	void DrawHearts();
+	void CreatePrincess(); 
 	bool m_IsColored = true;
+	bool m_DonkeyIsDead = false;
 	CMovingItem m_mario;
 	CItem m_donkeykong;
+	CItem m_princess; 
 	std::vector<CMovingItem> m_barrels;
 	CBoard m_board;
 };

@@ -59,6 +59,7 @@ public:
 	int GetBorderWidth() { return BORDER_WIDTH; };
 	enum Board_Place GetBoardPlace(CPoint& const point);
 	bool GetBoardCh(CPoint& coord, char* symbol, CColorPoint::c_color* color);
+	void UpdateWorkBoard(int x, int y, char symbol);
 
 private:
 	//void RestoreBoard

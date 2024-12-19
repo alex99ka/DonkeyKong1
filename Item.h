@@ -38,6 +38,7 @@ public:
 	void Draw() { _draw(m_symbol, m_color); }
 	void Erase() { _draw(m_RestoreSymbol, m_RestoreColor); }
 	char GetNextSymbol() { return m_RestoreSymbol; }
+	void ChangeColor(CColorPoint::c_color NewColor) { m_color = NewColor; }
 
 private:
 	char m_symbol;
